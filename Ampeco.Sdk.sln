@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{25D025B6-8D94-406B-A4ED-064C96C9ABB5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ampeco.Sdk", "src\Ampeco.Sdk\Ampeco.Sdk.csproj", "{5FA08472-74A4-4B4E-AA51-3DA9B8642AEB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{93F9721F-FC2E-433E-A5F2-4A3D53F2E207}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ampeco.Sdk.Tests", "tests\Ampeco.Sdk.Tests\Ampeco.Sdk.Tests.csproj", "{B5FDDB11-1C21-42CF-B103-5B340774D6A7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5FA08472-74A4-4B4E-AA51-3DA9B8642AEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FA08472-74A4-4B4E-AA51-3DA9B8642AEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5FA08472-74A4-4B4E-AA51-3DA9B8642AEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5FA08472-74A4-4B4E-AA51-3DA9B8642AEB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B5FDDB11-1C21-42CF-B103-5B340774D6A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5FDDB11-1C21-42CF-B103-5B340774D6A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5FDDB11-1C21-42CF-B103-5B340774D6A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5FDDB11-1C21-42CF-B103-5B340774D6A7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{5FA08472-74A4-4B4E-AA51-3DA9B8642AEB} = {25D025B6-8D94-406B-A4ED-064C96C9ABB5}
+		{B5FDDB11-1C21-42CF-B103-5B340774D6A7} = {93F9721F-FC2E-433E-A5F2-4A3D53F2E207}
+	EndGlobalSection
+EndGlobal

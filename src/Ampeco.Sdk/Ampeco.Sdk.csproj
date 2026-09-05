@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <RootNamespace>Ampeco.Sdk</RootNamespace>
+    <PackageId>Ampeco.Sdk</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>Ampeco integrators</Authors>
+    <Description>Hand-written .NET client SDK for the AMPECO EV Charging Platform Public API. Concrete classes, no code generation.</Description>
+    <PackageTags>ampeco;ev;charging;ocpi;api;sdk</PackageTags>
+    <PackageProjectUrl>https://developers.ampeco.com</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>
