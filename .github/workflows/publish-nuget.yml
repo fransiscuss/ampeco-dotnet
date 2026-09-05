@@ -1,7 +1,11 @@
 name: publish-nuget
 
-# Publishes Ampeco.Sdk to public nuget.org when a release tag is pushed,
-# or on demand from the Actions tab.
+# Publishes Ampeco.Sdk to public nuget.org using Trusted Publishing (OIDC):
+# no long-lived API key is stored anywhere. The nuget/login step exchanges a
+# short-lived GitHub OIDC token for a temporary API key (~1 hour validity).
+#
+# Required one-time setup on nuget.org (see README "Publishing"):
+#   Account settings → Trusted Publishing → add a policy for this repo + workflow.
 on:
   push:
     tags:
@@ -19,6 +23,13 @@ permissions:
 jobs:
   publish:
     runs-on: ubuntu-latest
+
+    # id-token: write is what allows GitHub to issue the OIDC token
+    # that nuget/login exchanges for the temporary API key.
+    permissions:
+      id-token: write
+      contents: read
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -52,16 +63,24 @@ jobs:
           dotnet pack src/Ampeco.Sdk -c Release -o artifacts --no-build
           ${{ env.VERSION != '' && format('-p:Version={0}', env.VERSION) || '' }}
 
+      # Exchanges the GitHub OIDC token for a short-lived nuget.org API key.
+      # NUGET_USER is your nuget.org profile name (not the e-mail address).
+      - name: NuGet login (OIDC → temporary API key)
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
       - name: Push to nuget.org
         run: >
           dotnet nuget push "artifacts/*.nupkg"
-          --api-key "${{ secrets.NUGET_API_KEY }}"
+          --api-key "${{ steps.login.outputs.NUGET_API_KEY }}"
           --source https://api.nuget.org/v3/index.json
           --skip-duplicate
 
       - name: Push symbol package
         run: >
           dotnet nuget push "artifacts/*.snupkg"
-          --api-key "${{ secrets.NUGET_API_KEY }}"
+          --api-key "${{ steps.login.outputs.NUGET_API_KEY }}"
           --source https://api.nuget.org/v3/index.json
           --skip-duplicate
