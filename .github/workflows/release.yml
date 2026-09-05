@@ -1,6 +1,7 @@
 name: release
 
-# Automated release flow (release-please + trusted publishing to nuget.org):
+# Automated release flow (release-please + trusted publishing to nuget.org),
+# mirroring the working setup in greenflux-dotnet:
 #
 # 1. Every push to main runs release-please. It maintains a "Release PR" that
 #    accumulates merged changes, computes the next semver from Conventional
@@ -10,6 +11,9 @@ name: release
 #    (vX.Y.Z) and GitHub Release.
 # 3. The publish job then packs the tagged commit and pushes to nuget.org
 #    using Trusted Publishing (OIDC) — no stored API key.
+#
+# nuget.org requirement: a Trusted Publishing policy for
+#   owner=fransiscuss  repository=ampeco-dotnet  workflow=release.yml
 
 on:
   push:
@@ -47,11 +51,11 @@ jobs:
       contents: read
     steps:
       - name: Checkout released tag
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ needs.release-please.outputs.tag_name }}
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: |
             8.0.x
@@ -67,24 +71,22 @@ jobs:
         run: dotnet test --no-build -c Release
 
       - name: Pack
-        run: dotnet pack src/Ampeco.Sdk -c Release -o artifacts --no-build
+        run: dotnet pack src/Ampeco.Sdk/Ampeco.Sdk.csproj -c Release -o artifacts/packages
 
-      - name: NuGet login (OIDC → temporary API key)
+      - name: NuGet login (OIDC)
         uses: NuGet/login@v1
         id: login
         with:
-          user: ${{ secrets.NUGET_USER }}
+          user: fransiscus
 
-      - name: Push to nuget.org
-        run: >
-          dotnet nuget push "artifacts/*.nupkg"
-          --api-key "${{ steps.login.outputs.NUGET_API_KEY }}"
-          --source https://api.nuget.org/v3/index.json
-          --skip-duplicate
+      - name: Push to NuGet.org
+        run: |
+          dotnet nuget push artifacts/packages/*.nupkg \
+            --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" \
+            --source https://api.nuget.org/v3/index.json
 
       - name: Push symbol package
-        run: >
-          dotnet nuget push "artifacts/*.snupkg"
-          --api-key "${{ steps.login.outputs.NUGET_API_KEY }}"
-          --source https://api.nuget.org/v3/index.json
-          --skip-duplicate
+        run: |
+          dotnet nuget push artifacts/packages/*.snupkg \
+            --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" \
+            --source https://api.nuget.org/v3/index.json

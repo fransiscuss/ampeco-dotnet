@@ -1,6 +1,5 @@
-name: ci
+name: CI
 
-# Build + test on every PR targeting main and on every push to main.
 on:
   push:
     branches: [main]
@@ -22,17 +21,14 @@ jobs:
       matrix:
         dotnet: ['8.0.x', '9.0.x']
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ matrix.dotnet }}
 
-      - name: Restore
-        run: dotnet restore
+      - run: dotnet restore
 
-      - name: Build
-        run: dotnet build --no-restore -c Release
+      - run: dotnet build --no-restore --configuration Release
 
-      - name: Test
-        run: dotnet test --no-build -c Release
+      - run: dotnet test --no-build --configuration Release
