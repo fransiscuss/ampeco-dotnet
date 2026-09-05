@@ -1,0 +1,90 @@
+name: release
+
+# Automated release flow (release-please + trusted publishing to nuget.org):
+#
+# 1. Every push to main runs release-please. It maintains a "Release PR" that
+#    accumulates merged changes, computes the next semver from Conventional
+#    Commits (fix: → patch, feat: → minor, feat!/BREAKING CHANGE: → major),
+#    updates CHANGELOG.md and the csproj version.
+# 2. When that Release PR is merged, release-please creates the git tag
+#    (vX.Y.Z) and GitHub Release.
+# 3. The publish job then packs the tagged commit and pushes to nuget.org
+#    using Trusted Publishing (OIDC) — no stored API key.
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write       # create tags and releases
+      pull-requests: write  # create/update the Release PR
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - name: Run release-please
+        id: release
+        uses: googleapis/release-please-action@v5
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  publish:
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write   # OIDC token for NuGet Trusted Publishing
+      contents: read
+    steps:
+      - name: Checkout released tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name }}
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore -c Release
+
+      - name: Test
+        run: dotnet test --no-build -c Release
+
+      - name: Pack
+        run: dotnet pack src/Ampeco.Sdk -c Release -o artifacts --no-build
+
+      - name: NuGet login (OIDC → temporary API key)
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
+      - name: Push to nuget.org
+        run: >
+          dotnet nuget push "artifacts/*.nupkg"
+          --api-key "${{ steps.login.outputs.NUGET_API_KEY }}"
+          --source https://api.nuget.org/v3/index.json
+          --skip-duplicate
+
+      - name: Push symbol package
+        run: >
+          dotnet nuget push "artifacts/*.snupkg"
+          --api-key "${{ steps.login.outputs.NUGET_API_KEY }}"
+          --source https://api.nuget.org/v3/index.json
+          --skip-duplicate

@@ -147,6 +147,17 @@ Open an issue or add a sub-client modeled on the existing ones.
 
 <https://developers.ampeco.com>
 
+## Releases & contributing
+
+Releases are fully automated via [release-please](https://github.com/googleapis/release-please-action) + NuGet Trusted Publishing:
+
+1. Open PRs against `main`. **Use Conventional Commit titles** — this is what drives versioning:
+   - `fix:` … → patch release
+   - `feat:` … → minor release
+   - `feat!:` / `BREAKING CHANGE:` → major release
+2. When a PR merges to `main`, release-please maintains a **Release PR** that accumulates the changes, updates `CHANGELOG.md` and the package version.
+3. Merging the Release PR automatically tags the repo, creates the GitHub Release, and publishes the package to [nuget.org](https://www.nuget.org) via OIDC Trusted Publishing — no stored credentials.
+
 ## License
 
 MIT
