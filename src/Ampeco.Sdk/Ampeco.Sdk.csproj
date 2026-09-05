@@ -4,7 +4,7 @@
     <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
     <RootNamespace>Ampeco.Sdk</RootNamespace>
     <PackageId>Ampeco.Sdk</PackageId>
-    <Version>0.1.0</Version>
+    <Version>1.0.0</Version>
     <Authors>Ampeco integrators</Authors>
     <Description>Hand-written .NET client SDK for the AMPECO EV Charging Platform Public API. Concrete classes, no code generation.</Description>
     <PackageTags>ampeco;ev;charging;ocpi;api;sdk</PackageTags>
@@ -18,7 +18,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
 </Project>
