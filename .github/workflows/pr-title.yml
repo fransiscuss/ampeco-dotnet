@@ -1,0 +1,37 @@
+name: pr-title
+
+# Enforces Conventional Commit titles on PRs. This is what drives
+# release-please versioning: fix: → patch, feat: → minor, feat!:/BREAKING
+# CHANGE: → major. Other types (docs:, chore:, ci:, test:, refactor:) are
+# merged into the changelog without triggering a release.
+on:
+  pull_request_target:
+    types: [opened, reopened, edited, synchronize]
+
+permissions:
+  pull-requests: read
+  statuses: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            chore
+            ci
+            test
+            refactor
+            perf
+            build
+          requireSubject: true
+          ignoreLabels: |
+            bot
+          # release-please's own PRs use their own title format
+          validateSingleCommit: false
