@@ -95,4 +95,5 @@ jobs:
         run: |
           dotnet nuget push artifacts/packages/*.snupkg \
             --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" \
-            --source https://api.nuget.org/v3/index.json
+            --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate
