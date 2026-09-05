@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Ampeco.Sdk.Models;
@@ -14,10 +15,7 @@ public sealed record GeoPosition
     public double Longitude { get; init; }
 }
 
-/// <summary>
-/// A translated text value: a list of locale/translation pairs, e.g. the location name.
-/// Serialized as an array of <c>{ "locale": ..., "translation": ... }</c> objects.
-/// </summary>
+/// <summary>A single localized translation entry.</summary>
 public sealed record TranslatedText
 {
     [JsonPropertyName("locale")]
@@ -25,6 +23,86 @@ public sealed record TranslatedText
 
     [JsonPropertyName("translation")]
     public string Translation { get; init; } = string.Empty;
+}
+
+/// <summary>
+/// A translated text value: a list of locale/translation pairs, e.g. the location name.
+/// Serialized as an array of <c>{ "locale": ..., "translation": ... }</c> objects.
+/// Accepts a plain string as well (treated as a single entry without locale).
+/// </summary>
+[JsonConverter(typeof(TranslatedTextListConverter))]
+public sealed class TranslatedTextList : List<TranslatedText>
+{
+    public TranslatedTextList()
+    {
+    }
+
+    public TranslatedTextList(IEnumerable<TranslatedText> items) : base(items)
+    {
+    }
+
+    /// <summary>Returns the translation for the given locale, or the first entry.</summary>
+    public string? For(string locale = "en") =>
+        this.FirstOrDefault(t => string.Equals(t.Locale, locale, StringComparison.OrdinalIgnoreCase))?.Translation
+        ?? this.FirstOrDefault()?.Translation;
+}
+
+/// <summary>Converts between plain strings and translated-text arrays.</summary>
+public sealed class TranslatedTextListConverter : JsonConverter<TranslatedTextList>
+{
+    public override TranslatedTextList Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        var list = new TranslatedTextList();
+
+        if (reader.TokenType == JsonTokenType.Null)
+        {
+            return list;
+        }
+
+        if (reader.TokenType == JsonTokenType.String)
+        {
+            list.Add(new TranslatedText { Locale = string.Empty, Translation = reader.GetString() ?? string.Empty });
+            return list;
+        }
+
+        if (reader.TokenType == JsonTokenType.StartObject)
+        {
+            // Locale map form: { "en": "Hello", "de": null }
+            using var doc = JsonDocument.ParseValue(ref reader);
+            foreach (var property in doc.RootElement.EnumerateObject())
+            {
+                if (property.Value.ValueKind == JsonValueKind.String)
+                {
+                    list.Add(new TranslatedText { Locale = property.Name, Translation = property.Value.GetString() ?? string.Empty });
+                }
+            }
+
+            return list;
+        }
+
+        if (reader.TokenType != JsonTokenType.StartArray)
+        {
+            throw new JsonException("Expected a string, an object of translations or an array of translations.");
+        }
+
+        foreach (var element in JsonSerializer.Deserialize<List<TranslatedText>>(ref reader, options) ?? [])
+        {
+            list.Add(element);
+        }
+
+        return list;
+    }
+
+    public override void Write(Utf8JsonWriter writer, TranslatedTextList value, JsonSerializerOptions options)
+    {
+        if (value.Count == 1 && value[0].Locale.Length == 0)
+        {
+            writer.WriteStringValue(value[0].Translation);
+            return;
+        }
+
+        JsonSerializer.Serialize(writer, value, options);
+    }
 }
 
 /// <summary>An open/closed working-hours interval for a single weekday.</summary>

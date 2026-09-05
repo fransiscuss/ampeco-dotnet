@@ -19,13 +19,13 @@ public sealed record Tariff
     public string Type { get; init; } = string.Empty;
 
     [JsonPropertyName("description")]
-    public IReadOnlyList<TranslatedText>? Description { get; init; }
+    public TranslatedTextList? Description { get; init; }
 
     [JsonPropertyName("additionalInformation")]
-    public IReadOnlyList<TranslatedText>? AdditionalInformation { get; init; }
+    public TranslatedTextList? AdditionalInformation { get; init; }
 
     [JsonPropertyName("learnMoreUrl")]
-    public IReadOnlyList<TranslatedText>? LearnMoreUrl { get; init; }
+    public TranslatedTextList? LearnMoreUrl { get; init; }
 
     /// <summary>Start of "day" pricing in HH:mm, for day/night tariffs.</summary>
     [JsonPropertyName("dayTariffStart")]
@@ -125,6 +125,12 @@ public sealed record TariffPricing
     [JsonPropertyName("fallbackElectricityRateId")] public long? FallbackElectricityRateId { get; init; }
     [JsonPropertyName("markupPercentagePerKwh")] public decimal? MarkupPercentagePerKwh { get; init; }
     [JsonPropertyName("markupFixedFeePerKwh")] public decimal? MarkupFixedFeePerKwh { get; init; }
+
+    /// <summary>SoC above which the session is considered idle, when reported by the vehicle.</summary>
+    [JsonPropertyName("stateOfChargeIdleThreshold")] public decimal? StateOfChargeIdleThreshold { get; init; }
+
+    /// <summary>Average power below which the session is considered idle.</summary>
+    [JsonPropertyName("averagePowerIdleThreshold")] public decimal? AveragePowerIdleThreshold { get; init; }
 }
 
 /// <summary>Settings for discount-based tariffs.</summary>
@@ -200,9 +206,9 @@ public sealed record TariffDisplay
     [JsonPropertyName("defaultPriceInformation")] public string? DefaultPriceInformation { get; init; }
     [JsonPropertyName("defaultPriceInformationOffline")] public string? DefaultPriceInformationOffline { get; init; }
     [JsonPropertyName("priceInformation")] public string? PriceInformation { get; init; }
-    [JsonPropertyName("priceInformationLocalized")] public IReadOnlyList<TranslatedText>? PriceInformationLocalized { get; init; }
+    [JsonPropertyName("priceInformationLocalized")] public TranslatedTextList? PriceInformationLocalized { get; init; }
     [JsonPropertyName("totalCostInformation")] public string? TotalCostInformation { get; init; }
-    [JsonPropertyName("totalCostInformationLocalized")] public IReadOnlyList<TranslatedText>? TotalCostInformationLocalized { get; init; }
+    [JsonPropertyName("totalCostInformationLocalized")] public TranslatedTextList? TotalCostInformationLocalized { get; init; }
     [JsonPropertyName("plainTextModeEnabled")] public bool? PlainTextModeEnabled { get; init; }
 }
 
@@ -217,13 +223,13 @@ public sealed record TariffWrite
     [JsonPropertyName("type")] public string? Type { get; init; }
 
     [JsonPropertyName("description")] [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public IReadOnlyList<TranslatedText>? Description { get; init; }
+    public TranslatedTextList? Description { get; init; }
 
     [JsonPropertyName("additionalInformation")] [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public IReadOnlyList<TranslatedText>? AdditionalInformation { get; init; }
+    public TranslatedTextList? AdditionalInformation { get; init; }
 
     [JsonPropertyName("learnMoreUrl")] [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public IReadOnlyList<TranslatedText>? LearnMoreUrl { get; init; }
+    public TranslatedTextList? LearnMoreUrl { get; init; }
 
     [JsonPropertyName("dayTariffStart")] [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? DayTariffStart { get; init; }

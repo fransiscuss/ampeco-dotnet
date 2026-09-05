@@ -56,6 +56,14 @@ public sealed record ChargePoint
     [JsonPropertyName("network")]
     public ChargePointNetwork? Network { get; init; }
 
+    /// <summary>Communication mode: <c>none</c>, <c>direct_ocpp</c>, <c>via_ocpp_connected_charge_point</c> or <c>roaming</c>.</summary>
+    [JsonPropertyName("communicationMode")]
+    public string? CommunicationMode { get; init; }
+
+    /// <summary>DC power sharing configuration.</summary>
+    [JsonPropertyName("powerSharing")]
+    public PowerSharing? PowerSharing { get; init; }
+
     /// <summary><see cref="ValueSets.ChargePointCapability"/> values.</summary>
     [JsonPropertyName("capabilities")]
     public IReadOnlyList<string>? Capabilities { get; init; }
@@ -128,7 +136,7 @@ public sealed record ChargePoint
     public string? VendorErrorCode { get; init; }
 
     [JsonPropertyName("tags")]
-    public IReadOnlyDictionary<string, string>? Tags { get; init; }
+    public IReadOnlyList<string>? Tags { get; init; }
 
     [JsonPropertyName("uptimeTrackingEnabled")]
     public bool? UptimeTrackingEnabled { get; init; }
@@ -172,29 +180,58 @@ public sealed record ChargePoint
 /// <summary>OCPP connectivity details of a charge point.</summary>
 public sealed record ChargePointNetwork
 {
-    [JsonPropertyName("ocppVersion")]
-    public string? OcppVersion { get; init; }
+    /// <summary>OCPP identifier.</summary>
+    [JsonPropertyName("id")]
+    public string? Id { get; init; }
 
-    [JsonPropertyName("ocppId")]
-    public string? OcppId { get; init; }
+    /// <summary>OCPP protocol: <c>ocpp 1.5</c>, <c>ocpp 1.6</c>, <c>ocpp 1.6 soap</c> or <c>ocpp 2.0.1</c>.</summary>
+    [JsonPropertyName("protocol")]
+    public string? Protocol { get; init; }
 
-    [JsonPropertyName("securityProfile")]
-    public int? SecurityProfile { get; init; }
+    [JsonPropertyName("password")]
+    public string? Password { get; init; }
+
+    /// <summary>Required for ocpp 1.5 (SOAP).</summary>
+    [JsonPropertyName("ip")]
+    public string? Ip { get; init; }
+
+    /// <summary>Required for ocpp 1.5 (SOAP).</summary>
+    [JsonPropertyName("port")]
+    public int? Port { get; init; }
+}
+
+/// <summary>DC power sharing configuration of a charge point.</summary>
+public sealed record PowerSharing
+{
+    [JsonPropertyName("enabled")]
+    public bool? Enabled { get; init; }
+
+    [JsonPropertyName("managementMode")]
+    public string? ManagementMode { get; init; }
+
+    /// <summary>Total cabinet power in kW.</summary>
+    [JsonPropertyName("totalCabinetPowerKw")]
+    public int? TotalCabinetPowerKw { get; init; }
+
+    /// <summary>Module size in kW.</summary>
+    [JsonPropertyName("moduleSizeKw")]
+    public int? ModuleSizeKw { get; init; }
 }
 
 /// <summary>OCPP security settings of a charge point.</summary>
 public sealed record ChargePointSecurity
 {
     /// <summary>Desired OCPP security profile (0–3).</summary>
-    [JsonPropertyName("desiredLevel")]
-    public int? DesiredLevel { get; init; }
+    [JsonPropertyName("desiredProfile")]
+    public int? DesiredProfile { get; init; }
 
-    /// <summary><see cref="ValueSets.ChargePointNetworkStatus"/>-like applied status: <c>applied</c>, <c>pending</c> or <c>rejected</c>.</summary>
+    /// <summary>Currently applied OCPP security profile.</summary>
+    [JsonPropertyName("currentProfile")]
+    public int? CurrentProfile { get; init; }
+
+    /// <summary>Whether the desired profile is <c>applied</c>, <c>pending</c> or <c>rejected</c>.</summary>
     [JsonPropertyName("desiredProfileStatus")]
     public string? DesiredProfileStatus { get; init; }
-
-    [JsonPropertyName("currentLevel")]
-    public int? CurrentLevel { get; init; }
 }
 
 /// <summary>Subscription configuration of a personal (home) charge point.</summary>
@@ -220,16 +257,6 @@ public sealed record ChargePointOwner
     public string? Email { get; init; }
 }
 
-/// <summary>Partner associated with a charge point.</summary>
-public sealed record ChargePointPartner
-{
-    [JsonPropertyName("id")]
-    public long? Id { get; init; }
-
-    [JsonPropertyName("name")]
-    public string? Name { get; init; }
-}
-
 /// <summary>Tariff display message configuration.</summary>
 public sealed record ChargePointTariffDisplayMessages
 {
@@ -240,29 +267,49 @@ public sealed record ChargePointTariffDisplayMessages
     public string? Language { get; init; }
 }
 
+/// <summary>Partner associated with a charge point.</summary>
+public sealed record ChargePointPartner
+{
+    [JsonPropertyName("id")]
+    public long? Id { get; init; }
+
+    [JsonPropertyName("contractId")]
+    public long? ContractId { get; init; }
+
+    [JsonPropertyName("contactId")]
+    public long? ContactId { get; init; }
+
+    /// <summary>Whether the partner's corporate billing is used as the payment method for guest sessions.</summary>
+    [JsonPropertyName("corporateBillingAsDefault")]
+    public bool? CorporateBillingAsDefault { get; init; }
+}
+
 /// <summary>Last OCPP boot notification received from a charge point.</summary>
 public sealed record ChargePointBootNotification
 {
-    [JsonPropertyName("serialNumber")]
-    public string? SerialNumber { get; init; }
+    [JsonPropertyName("model")]
+    public string? Model { get; init; }
 
     [JsonPropertyName("vendor")]
     public string? Vendor { get; init; }
 
-    [JsonPropertyName("model")]
-    public string? Model { get; init; }
-
-    [JsonPropertyName("firmwareVersion")]
-    public string? FirmwareVersion { get; init; }
+    [JsonPropertyName("chargeBoxSerialNumber")]
+    public string? ChargeBoxSerialNumber { get; init; }
 
     [JsonPropertyName("chargePointSerialNumber")]
     public string? ChargePointSerialNumber { get; init; }
 
-    [JsonPropertyName("chargePointModel")]
-    public string? ChargePointModel { get; init; }
+    [JsonPropertyName("firmwareVersion")]
+    public string? FirmwareVersion { get; init; }
 
-    [JsonPropertyName("chargePointVendor")]
-    public string? ChargePointVendor { get; init; }
+    [JsonPropertyName("iccid")]
+    public string? Iccid { get; init; }
+
+    [JsonPropertyName("imsi")]
+    public string? Imsi { get; init; }
+
+    [JsonPropertyName("meterSerialNumber")]
+    public string? MeterSerialNumber { get; init; }
 
     [JsonPropertyName("receivedAt")]
     public DateTimeOffset? ReceivedAt { get; init; }
@@ -302,6 +349,16 @@ public sealed record ChargePointWrite
     [JsonPropertyName("networkType")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? NetworkType { get; init; }
+
+    /// <summary>Communication mode: <c>none</c>, <c>direct_ocpp</c> or <c>via_ocpp_connected_charge_point</c>.</summary>
+    [JsonPropertyName("communicationMode")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? CommunicationMode { get; init; }
+
+    /// <summary>DC power sharing configuration.</summary>
+    [JsonPropertyName("powerSharing")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public PowerSharing? PowerSharing { get; init; }
 
     /// <summary><see cref="ValueSets.ChargePointStatus"/>.</summary>
     [JsonPropertyName("status")]
@@ -360,7 +417,7 @@ public sealed record ChargePointWrite
 
     [JsonPropertyName("tags")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public IReadOnlyDictionary<string, string>? Tags { get; init; }
+    public IReadOnlyList<string>? Tags { get; init; }
 
     [JsonPropertyName("uptimeTrackingEnabled")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]

@@ -16,17 +16,17 @@ public sealed record Location
 
     /// <summary>Localized name.</summary>
     [JsonPropertyName("name")]
-    public IReadOnlyList<TranslatedText>? Name { get; init; }
+    public TranslatedTextList? Name { get; init; }
 
     /// <summary>Localized description.</summary>
     [JsonPropertyName("description")]
-    public IReadOnlyList<TranslatedText>? Description { get; init; }
+    public TranslatedTextList? Description { get; init; }
 
     [JsonPropertyName("shortDescription")]
-    public IReadOnlyList<TranslatedText>? ShortDescription { get; init; }
+    public TranslatedTextList? ShortDescription { get; init; }
 
     [JsonPropertyName("additionalDescription")]
-    public IReadOnlyList<TranslatedText>? AdditionalDescription { get; init; }
+    public TranslatedTextList? AdditionalDescription { get; init; }
 
     /// <summary><see cref="ValueSets.Status"/>.</summary>
     [JsonPropertyName("status")]
@@ -36,7 +36,7 @@ public sealed record Location
     public GeoPosition? Geoposition { get; init; }
 
     [JsonPropertyName("streetAddress")]
-    public string? StreetAddress { get; init; }
+    public TranslatedTextList? StreetAddress { get; init; }
 
     [JsonPropertyName("city")]
     public string? City { get; init; }
@@ -61,6 +61,10 @@ public sealed record Location
     /// <summary><see cref="ValueSets.ParkingType"/>.</summary>
     [JsonPropertyName("parkingType")]
     public string? ParkingType { get; init; }
+
+    /// <summary>Accessibility of the location, e.g. <c>free_publicly_accessible</c>.</summary>
+    [JsonPropertyName("accessibilityType")]
+    public string? AccessibilityType { get; init; }
 
     /// <summary><see cref="ValueSets.AccessMethod"/> values.</summary>
     [JsonPropertyName("accessMethods")]
@@ -159,7 +163,7 @@ public sealed record LocationWrite
 
     [JsonPropertyName("name")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public IReadOnlyList<TranslatedText>? Name { get; init; }
+    public TranslatedTextList? Name { get; init; }
 
     /// <summary><see cref="ValueSets.Status"/>.</summary>
     [JsonPropertyName("status")]
@@ -168,15 +172,15 @@ public sealed record LocationWrite
 
     [JsonPropertyName("description")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public IReadOnlyList<TranslatedText>? Description { get; init; }
+    public TranslatedTextList? Description { get; init; }
 
     [JsonPropertyName("shortDescription")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public IReadOnlyList<TranslatedText>? ShortDescription { get; init; }
+    public TranslatedTextList? ShortDescription { get; init; }
 
     [JsonPropertyName("additionalDescription")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public IReadOnlyList<TranslatedText>? AdditionalDescription { get; init; }
+    public TranslatedTextList? AdditionalDescription { get; init; }
 
     [JsonPropertyName("geoposition")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -184,7 +188,7 @@ public sealed record LocationWrite
 
     [JsonPropertyName("streetAddress")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string? StreetAddress { get; init; }
+    public TranslatedTextList? StreetAddress { get; init; }
 
     [JsonPropertyName("city")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]

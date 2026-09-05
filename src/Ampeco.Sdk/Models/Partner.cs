@@ -16,7 +16,7 @@ public sealed record Partner
 
     /// <summary>Localized display name.</summary>
     [JsonPropertyName("translatedName")]
-    public IReadOnlyList<TranslatedText>? TranslatedName { get; init; }
+    public TranslatedTextList? TranslatedName { get; init; }
 
     [JsonPropertyName("businessName")]
     public string? BusinessName { get; init; }
@@ -32,7 +32,7 @@ public sealed record Partner
 
     /// <summary>Localized display address.</summary>
     [JsonPropertyName("translatedAddress")]
-    public IReadOnlyList<TranslatedText>? TranslatedAddress { get; init; }
+    public TranslatedTextList? TranslatedAddress { get; init; }
 
     [JsonPropertyName("postcode")]
     public string? PostCode { get; init; }
@@ -42,7 +42,7 @@ public sealed record Partner
 
     /// <summary>Localized display city.</summary>
     [JsonPropertyName("translatedCity")]
-    public IReadOnlyList<TranslatedText>? TranslatedCity { get; init; }
+    public TranslatedTextList? TranslatedCity { get; init; }
 
     /// <summary>ISO 3166-1 alpha-2 country code.</summary>
     [JsonPropertyName("country")]
@@ -53,7 +53,7 @@ public sealed record Partner
 
     /// <summary>Localized display region.</summary>
     [JsonPropertyName("translatedRegion")]
-    public IReadOnlyList<TranslatedText>? TranslatedRegion { get; init; }
+    public TranslatedTextList? TranslatedRegion { get; init; }
 
     [JsonPropertyName("state")]
     public string? State { get; init; }
@@ -198,7 +198,7 @@ public sealed record PartnerWrite
 
     [JsonPropertyName("translatedName")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public IReadOnlyList<TranslatedText>? TranslatedName { get; init; }
+    public TranslatedTextList? TranslatedName { get; init; }
 
     [JsonPropertyName("businessName")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -218,7 +218,7 @@ public sealed record PartnerWrite
 
     [JsonPropertyName("translatedAddress")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public IReadOnlyList<TranslatedText>? TranslatedAddress { get; init; }
+    public TranslatedTextList? TranslatedAddress { get; init; }
 
     [JsonPropertyName("postcode")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -230,7 +230,7 @@ public sealed record PartnerWrite
 
     [JsonPropertyName("translatedCity")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public IReadOnlyList<TranslatedText>? TranslatedCity { get; init; }
+    public TranslatedTextList? TranslatedCity { get; init; }
 
     /// <summary>ISO 3166-1 alpha-2 country code.</summary>
     [JsonPropertyName("country")]
@@ -243,7 +243,7 @@ public sealed record PartnerWrite
 
     [JsonPropertyName("translatedRegion")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public IReadOnlyList<TranslatedText>? TranslatedRegion { get; init; }
+    public TranslatedTextList? TranslatedRegion { get; init; }
 
     [JsonPropertyName("state")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
