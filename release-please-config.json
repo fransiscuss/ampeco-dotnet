@@ -2,14 +2,14 @@
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
   "release-type": "simple",
   "include-component-in-tag": false,
+  "include-v-in-tag": true,
   "packages": {
     ".": {
-      "package-name": "Ampeco.Sdk",
+      "package-name": "AmpecoDotNet.Sdk",
       "extra-files": [
         {
-          "type": "xml",
-          "path": "src/Ampeco.Sdk/Ampeco.Sdk.csproj",
-          "xpath": "/Project/PropertyGroup/Version"
+          "type": "generic",
+          "path": "src/Ampeco.Sdk/Ampeco.Sdk.csproj"
         }
       ]
     }

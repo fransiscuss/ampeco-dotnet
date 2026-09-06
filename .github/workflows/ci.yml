@@ -16,19 +16,21 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        dotnet: ['8.0.x', '9.0.x']
     steps:
       - uses: actions/checkout@v6
 
+      # The package multi-targets net8.0 and net10.0, so both SDKs must be present:
+      # the .NET 8 SDK alone cannot build a net10.0 target framework (NETSDK1045).
       - uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: ${{ matrix.dotnet }}
+          dotnet-version: |
+            8.0.x
+            10.0.x
 
       - run: dotnet restore
 
-      - run: dotnet build --no-restore --configuration Release
+      - run: dotnet build --no-restore -c Release
 
-      - run: dotnet test --no-build --configuration Release
+      # Run the suite on each supported runtime, not just the newest one.
+      - run: dotnet test --no-build -c Release -f net8.0
+      - run: dotnet test --no-build -c Release -f net10.0
