@@ -1,4 +1,5 @@
 using Ampeco.Sdk.Internal;
+using Microsoft.Extensions.Options;
 
 namespace Ampeco.Sdk;
 
@@ -13,7 +14,7 @@ namespace Ampeco.Sdk;
 /// <see cref="Receipts"/>, <see cref="Subscriptions"/> and <see cref="Roaming"/>.
 /// All API errors are surfaced as <see cref="AmpecoApiException"/>.
 /// </remarks>
-public sealed class AmpecoClient : IDisposable
+public sealed class AmpecoClient : IAmpecoClient, IDisposable
 {
     private readonly ApiConnection _connection;
     private readonly bool _ownsConnection;
@@ -52,46 +53,73 @@ public sealed class AmpecoClient : IDisposable
         Roaming = new RoamingClient(_connection);
     }
 
-    /// <summary>Charge point CRUD and charging actions.</summary>
+    /// <summary>
+    /// Constructor used by <c>services.AddAmpeco(...)</c>. The <paramref name="httpClient"/> is
+    /// supplied and owned by <c>IHttpClientFactory</c>, so this client never disposes it.
+    /// </summary>
+    /// <param name="httpClient">The typed client's <see cref="HttpClient"/>.</param>
+    /// <param name="options">The configured client options.</param>
+    public AmpecoClient(HttpClient httpClient, IOptions<AmpecoClientOptions> options)
+        : this(ForHttpClient(httpClient, options))
+    {
+    }
+
+    private static AmpecoClientOptions ForHttpClient(HttpClient httpClient, IOptions<AmpecoClientOptions> options)
+    {
+        ArgumentNullException.ThrowIfNull(httpClient);
+        ArgumentNullException.ThrowIfNull(options);
+
+        var value = options.Value;
+        return new AmpecoClientOptions
+        {
+            TenantUrl = value.TenantUrl,
+            ApiKey = value.ApiKey,
+            RequestTimeout = value.RequestTimeout,
+            DefaultPerPage = value.DefaultPerPage,
+            HttpClient = httpClient,
+        };
+    }
+
+    /// <inheritdoc />
     public ChargePointsClient ChargePoints { get; }
 
-    /// <summary>EVSE CRUD and charging actions.</summary>
+    /// <inheritdoc />
     public EvsesClient Evses { get; }
 
-    /// <summary>Location CRUD.</summary>
+    /// <inheritdoc />
     public LocationsClient Locations { get; }
 
-    /// <summary>User CRUD.</summary>
+    /// <inheritdoc />
     public UsersClient Users { get; }
 
-    /// <summary>Charging session reads and session actions.</summary>
+    /// <inheritdoc />
     public SessionsClient Sessions { get; }
 
-    /// <summary>Payment transaction reads and writes.</summary>
+    /// <inheritdoc />
     public TransactionsClient Transactions { get; }
 
-    /// <summary>Tariff CRUD.</summary>
+    /// <inheritdoc />
     public TariffsClient Tariffs { get; }
 
-    /// <summary>Reservation reads and the cancel action.</summary>
+    /// <inheritdoc />
     public ReservationsClient Reservations { get; }
 
-    /// <summary>Partner CRUD.</summary>
+    /// <inheritdoc />
     public PartnersClient Partners { get; }
 
-    /// <summary>Read-only roaming CDR access.</summary>
+    /// <inheritdoc />
     public CdrsClient Cdrs { get; }
 
-    /// <summary>Read-only invoice access.</summary>
+    /// <inheritdoc />
     public InvoicesClient Invoices { get; }
 
-    /// <summary>Read-only receipt access.</summary>
+    /// <inheritdoc />
     public ReceiptsClient Receipts { get; }
 
-    /// <summary>Read-only subscription access.</summary>
+    /// <inheritdoc />
     public SubscriptionsClient Subscriptions { get; }
 
-    /// <summary>Roaming operators and connections.</summary>
+    /// <inheritdoc />
     public RoamingClient Roaming { get; }
 
     /// <inheritdoc />

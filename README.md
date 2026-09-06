@@ -1,15 +1,18 @@
-# Ampeco.Sdk
+# AmpecoDotNet.Sdk
 
-A hand-written .NET client SDK for the [AMPECO EV Charging Platform Public API](https://developers.ampeco.com) — concrete classes only, no code generation.
+An unofficial, hand-written .NET client SDK for the [AMPECO EV Charging Platform Public API](https://developers.ampeco.com) — concrete classes only, no code generation. Install from [NuGet](https://www.nuget.org/packages/AmpecoDotNet.Sdk/).
 
-- **Targets:** .NET 8.0 and .NET 9.0
-- **Dependencies:** none (only `System.Text.Json`, part of the BCL)
+- **Targets:** .NET 8.0 and .NET 10.0 (both LTS)
+- **Serialization:** `System.Text.Json`, no third-party JSON dependency
+- **Dependencies:** `Microsoft.Extensions.Http`, for the `IHttpClientFactory` registration
 - **API version used for modeling:** Public API spec v3.244.0 (September 2026)
+
+This project is not affiliated with AMPECO.
 
 ## Installation
 
 ```sh
-dotnet add package Ampeco.Sdk
+dotnet add package AmpecoDotNet.Sdk
 ```
 
 Or build from source: `dotnet pack src/Ampeco.Sdk -o artifacts`.
@@ -55,6 +58,40 @@ Dispose the client when done if it owns its `HttpClient`:
 ```csharp
 client.Dispose();
 ```
+
+## Dependency injection
+
+In an application with a service container, register the client instead of constructing it.
+The `HttpClient` is then pooled and managed by `IHttpClientFactory`, and you never dispose
+the SDK client yourself:
+
+```csharp
+using Microsoft.Extensions.DependencyInjection;
+
+builder.Services.AddAmpeco(options =>
+{
+    options.TenantUrl = builder.Configuration["Ampeco:TenantUrl"]!;
+    options.ApiKey = builder.Configuration["Ampeco:ApiKey"]!;
+});
+```
+
+Then take a dependency on `IAmpecoClient`:
+
+```csharp
+public sealed class ChargePointService(IAmpecoClient ampeco)
+{
+    public Task<ChargePoint> GetAsync(long id) => ampeco.ChargePoints.GetAsync(id);
+}
+```
+
+`AddAmpeco` returns the `IHttpClientBuilder`, so you can layer your own handlers on top:
+
+```csharp
+builder.Services.AddAmpeco(...).AddStandardResilienceHandler();
+```
+
+Credentials should come from user secrets, a secrets manager, or environment variables —
+not source control.
 
 ## API surface
 

@@ -5,17 +5,21 @@ namespace Ampeco.Sdk;
 /// </summary>
 public sealed class AmpecoClientOptions
 {
+    // TenantUrl and ApiKey are deliberately not `required`: a type with required members
+    // cannot satisfy the new() constraint the Options pattern needs. They are validated
+    // at runtime instead - by AddAmpeco() and by the AmpecoClient constructor.
+
     /// <summary>
     /// Your AMPECO tenant URL, e.g. <c>https://mytenant.ampeco.com</c>.
     /// The SDK appends the <c>/public-api/</c> base path automatically.
     /// </summary>
-    public required string TenantUrl { get; set; }
+    public string TenantUrl { get; set; } = string.Empty;
 
     /// <summary>
     /// API token generated in the CHARGE back office (Back Office → API Access Tokens).
     /// Sent as an <c>Authorization: Bearer</c> header on every request.
     /// </summary>
-    public required string ApiKey { get; set; }
+    public string ApiKey { get; set; } = string.Empty;
 
     /// <summary>
     /// The <see cref="System.Net.Http.HttpClient"/> to use. When null (default) the client
