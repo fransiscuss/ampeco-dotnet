@@ -34,3 +34,25 @@ jobs:
       # Run the suite on each supported runtime, not just the newest one.
       - run: dotnet test --no-build -c Release -f net8.0
       - run: dotnet test --no-build -c Release -f net10.0
+
+      # Packaging used to be exercised for the first time during a release, so a
+      # broken .nupkg was only discovered once the tag already existed.
+      - name: Verify the package builds
+        run: dotnet pack src/Ampeco.Sdk/Ampeco.Sdk.csproj --no-build -c Release -o artifacts/packages
+
+      - name: List package contents
+        run: |
+          for package in artifacts/packages/*.nupkg; do
+            echo "== $package"
+            unzip -l "$package"
+          done
+
+      # `dotnet list package --vulnerable` reports findings on stdout and still
+      # exits 0, so the log has to be inspected for the build to fail.
+      - name: Audit dependencies for known vulnerabilities
+        run: |
+          dotnet list package --vulnerable --include-transitive 2>&1 | tee audit.log
+          if grep -q "has the following vulnerable packages" audit.log; then
+            echo "::error::Vulnerable NuGet packages found."
+            exit 1
+          fi

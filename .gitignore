@@ -2,7 +2,13 @@ bin/
 obj/
 *.user
 .vs/
+.idea/
 artifacts/
 *.nupkg
 *.snupkg
 TestResults/
+coverage/
+.env
+.env.*
+!.env.example
+local-test/

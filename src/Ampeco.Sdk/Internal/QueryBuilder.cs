@@ -14,7 +14,6 @@ public sealed class QueryBuilder
     private readonly List<(string Key, string? Value)> _params = [];
 
     /// <summary>Adds <c>key=value</c> when <paramref name="value"/> is not null.</summary>
-    /// <summary>Adds <c>key=value</c> when <paramref name="value"/> is not null.</summary>
     public void Add(string key, string? value)
     {
         if (value is not null)
@@ -44,7 +43,6 @@ public sealed class QueryBuilder
     /// Serializes a filter object as AMPECO deepObject parameters, e.g. <c>filter[userId]=123</c>.
     /// Arrays are emitted Laravel-style as repeated <c>filter[key][]</c> entries.
     /// </summary>
-    /// <summary>Serializes a filter object as deepObject <c>filter[name]=value</c> parameters.</summary>
     public void AddFilter<TFilter>(TFilter? filter) where TFilter : class
     {
         if (filter is null)
@@ -59,7 +57,6 @@ public sealed class QueryBuilder
     }
 
     /// <summary>Adds repeated <c>include[]=name</c> parameters.</summary>
-    /// <summary>Adds repeated <c>include[]=name</c> parameters.</summary>
     public void AddIncludes(IEnumerable<string>? includes)
     {
         foreach (var include in includes ?? [])
@@ -69,7 +66,6 @@ public sealed class QueryBuilder
     }
 
     /// <summary>Adds the paging parameters (cursor + per_page).</summary>
-    /// <summary>Adds the paging parameters (cursor + per_page).</summary>
     public void AddPaging(PageRequest? request, int defaultPerPage)
     {
         // An empty "cursor" parameter opts the request into cursor pagination.
@@ -78,7 +74,6 @@ public sealed class QueryBuilder
         _params.Add(("per_page", Math.Clamp(perPage, 1, 100).ToString(System.Globalization.CultureInfo.InvariantCulture)));
     }
 
-    /// <summary>Replaces the value of the first matching key (or appends when absent).</summary>
     /// <summary>Replaces the value of the first matching key (or appends when absent).</summary>
     public void Set(string key, string? value)
     {
@@ -129,7 +124,7 @@ internal static class FilterSerializer
 
     public static IEnumerable<(string Key, string Value)> Enumerate<TFilter>(TFilter filter) where TFilter : class
     {
-        var props = Cache.GetOrAdd(typeof(TFilter), static t => [.. t.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+        var props = Cache.GetOrAdd(filter.GetType(), static t => [.. t.GetProperties(BindingFlags.Public | BindingFlags.Instance)
             .Where(p => p.CanRead && p.GetCustomAttribute<JsonIgnoreAttribute>() is null)]);
 
         foreach (var prop in props)

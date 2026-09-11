@@ -37,18 +37,53 @@ public sealed class AmpecoClientOptions
     public int DefaultPerPage { get; set; } = 100;
 
     /// <summary>
+    /// Returns null when the options are usable, or the reason they are not.
+    /// Shared by the constructor and by <c>AddAmpeco</c> so both reject the same input.
+    /// </summary>
+    internal string? Validate()
+    {
+        if (string.IsNullOrWhiteSpace(TenantUrl))
+        {
+            return $"{nameof(TenantUrl)} is required.";
+        }
+
+        if (string.IsNullOrWhiteSpace(ApiKey))
+        {
+            return $"{nameof(ApiKey)} is required.";
+        }
+
+        // The API key goes straight into an Authorization header; a stray CR/LF would
+        // let a mis-sourced value inject additional headers.
+        if (ApiKey.AsSpan().IndexOfAny('\r', '\n') >= 0)
+        {
+            return $"{nameof(ApiKey)} cannot contain newline characters.";
+        }
+
+        if (!Uri.TryCreate(GetNormalizedTenantUrl(), UriKind.Absolute, out _))
+        {
+            return $"{nameof(TenantUrl)} is not a valid absolute URL.";
+        }
+
+        if (DefaultPerPage is < 1 or > 100)
+        {
+            return $"{nameof(DefaultPerPage)} must be between 1 and 100.";
+        }
+
+        return null;
+    }
+
+    /// <summary>
     /// Normalizes the tenant URL and returns the API base address (with trailing slash),
     /// e.g. <c>https://mytenant.ampeco.com/public-api/</c>.
     /// </summary>
-    internal Uri GetBaseAddress()
+    internal Uri GetBaseAddress() => new(GetNormalizedTenantUrl() + "/public-api/", UriKind.Absolute);
+
+    private string GetNormalizedTenantUrl()
     {
         var url = TenantUrl.Trim().TrimEnd('/');
-        if (!url.StartsWith("http://", StringComparison.OrdinalIgnoreCase) &&
-            !url.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
-        {
-            url = "https://" + url;
-        }
-
-        return new Uri(url + "/public-api/", UriKind.Absolute);
+        return url.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+               url.StartsWith("https://", StringComparison.OrdinalIgnoreCase)
+            ? url
+            : "https://" + url;
     }
 }

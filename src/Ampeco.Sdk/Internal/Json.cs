@@ -29,6 +29,8 @@ internal static class Json
 /// </summary>
 internal sealed class LenientDateTimeOffsetConverter : JsonConverter<DateTimeOffset>
 {
+    internal static readonly LenientDateTimeOffsetConverter Instance = new();
+
     private const string Roundtrip = "O";
     private static readonly string[] FallbackFormats =
     [
@@ -78,14 +80,14 @@ internal sealed class LenientNullableDateTimeOffsetConverter : JsonConverter<Dat
             return null;
         }
 
-        return new LenientDateTimeOffsetConverter().Read(ref reader, typeof(DateTimeOffset), options);
+        return LenientDateTimeOffsetConverter.Instance.Read(ref reader, typeof(DateTimeOffset), options);
     }
 
     public override void Write(Utf8JsonWriter writer, DateTimeOffset? value, JsonSerializerOptions options)
     {
         if (value.HasValue)
         {
-            writer.WriteStringValue(value.Value.ToUniversalTime());
+            writer.WriteStringValue(value.Value.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture));
         }
         else
         {
@@ -100,6 +102,8 @@ internal sealed class LenientNullableDateTimeOffsetConverter : JsonConverter<Dat
 /// </summary>
 internal sealed class LenientDateOnlyConverter : JsonConverter<DateOnly>
 {
+    internal static readonly LenientDateOnlyConverter Instance = new();
+
     public override DateOnly Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         var value = reader.GetString() ?? throw new JsonException("Expected a date string.");
@@ -137,7 +141,7 @@ internal sealed class LenientNullableDateOnlyConverter : JsonConverter<DateOnly?
             return null;
         }
 
-        return new LenientDateOnlyConverter().Read(ref reader, typeof(DateOnly), options);
+        return LenientDateOnlyConverter.Instance.Read(ref reader, typeof(DateOnly), options);
     }
 
     public override void Write(Utf8JsonWriter writer, DateOnly? value, JsonSerializerOptions options)
@@ -159,6 +163,8 @@ internal sealed class LenientNullableDateOnlyConverter : JsonConverter<DateOnly?
 /// </summary>
 internal sealed class LenientTimeOnlyConverter : JsonConverter<TimeOnly>
 {
+    internal static readonly LenientTimeOnlyConverter Instance = new();
+
     private static readonly string[] Formats = ["HH:mm", "HH:mm:ss", "HH:mm:ss.FFF"];
 
     public override TimeOnly Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -201,7 +207,7 @@ internal sealed class LenientNullableTimeOnlyConverter : JsonConverter<TimeOnly?
             return null;
         }
 
-        return new LenientTimeOnlyConverter().Read(ref reader, typeof(TimeOnly), options);
+        return LenientTimeOnlyConverter.Instance.Read(ref reader, typeof(TimeOnly), options);
     }
 
     public override void Write(Utf8JsonWriter writer, TimeOnly? value, JsonSerializerOptions options)

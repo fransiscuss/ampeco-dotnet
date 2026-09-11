@@ -1,0 +1,7 @@
+# Keep line endings stable across Windows/WSL checkouts so files do not show up
+# as wholly rewritten in `git diff`.
+* text=auto eol=lf
+*.sln text eol=crlf
+*.png binary
+*.nupkg binary
+*.snupkg binary

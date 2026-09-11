@@ -1,0 +1,23 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.{json,yml,yaml,md}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.csproj]
+indent_size = 2
+
+# Model property names mirror the AMPECO wire contract rather than .NET conventions;
+# the JSON names themselves live in [JsonPropertyName].
+[src/Ampeco.Sdk/Models/**.cs]
+dotnet_diagnostic.CA1716.severity = none  # type name matching a reserved keyword

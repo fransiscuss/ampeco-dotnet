@@ -26,11 +26,9 @@ public static class AmpecoServiceCollectionExtensions
         services.AddOptions<AmpecoClientOptions>()
             .Configure(configure)
             .Validate(
-                static options => !string.IsNullOrWhiteSpace(options.TenantUrl),
-                $"{nameof(AmpecoClientOptions)}.{nameof(AmpecoClientOptions.TenantUrl)} is required.")
-            .Validate(
-                static options => !string.IsNullOrWhiteSpace(options.ApiKey),
-                $"{nameof(AmpecoClientOptions)}.{nameof(AmpecoClientOptions.ApiKey)} is required.");
+                static options => options.Validate() is null,
+                $"{nameof(AmpecoClientOptions)} is not valid; check TenantUrl, ApiKey and DefaultPerPage.")
+            .ValidateOnStart();
 
         return services.AddHttpClient<IAmpecoClient, AmpecoClient>(static (provider, client) =>
         {
