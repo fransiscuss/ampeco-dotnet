@@ -206,4 +206,4 @@ Releases are fully automated via [release-please](https://github.com/googleapis/
 
 ## License
 
-MIT
+MIT. Built and maintained by [Fransiscus Setiawan](https://fransiscuss.com).

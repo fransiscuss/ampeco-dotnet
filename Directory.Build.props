@@ -20,8 +20,8 @@
     actually usable in a debugger; the .NET SDK wires up SourceLink for GitHub.
   -->
   <PropertyGroup>
-    <Authors>Ampeco.Sdk contributors</Authors>
-    <Copyright>Copyright (c) 2026 Ampeco.Sdk contributors</Copyright>
+    <Authors>Fransiscus Setiawan</Authors>
+    <Copyright>Copyright (c) 2026 Fransiscus Setiawan</Copyright>
     <PackageProjectUrl>https://github.com/fransiscuss/ampeco-dotnet</PackageProjectUrl>
     <RepositoryUrl>https://github.com/fransiscuss/ampeco-dotnet.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
