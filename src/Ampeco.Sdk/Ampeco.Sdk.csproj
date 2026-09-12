@@ -6,7 +6,7 @@
     <RootNamespace>Ampeco.Sdk</RootNamespace>
     <PackageId>AmpecoDotNet.Sdk</PackageId>
     <Title>Ampeco .NET SDK</Title>
-    <Version>1.0.0</Version> <!-- x-release-please-version -->
+    <Version>2.0.0</Version> <!-- x-release-please-version -->
     <Description>Unofficial hand-written .NET client SDK for the AMPECO EV Charging Platform Public API. Concrete classes, no code generation.</Description>
     <PackageTags>ampeco;ev;charging;cpms;cpo;ocpi;api;sdk</PackageTags>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
