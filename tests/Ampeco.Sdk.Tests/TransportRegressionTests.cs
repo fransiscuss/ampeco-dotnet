@@ -1,5 +1,7 @@
 using System.Net;
 using Ampeco.Sdk.Models;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Xunit;
 
 namespace Ampeco.Sdk.Tests;
@@ -84,6 +86,48 @@ public class TransportRegressionTests
         Assert.Same(inner, exception.InnerException);
         Assert.Equal("Response could not be parsed.", exception.Message);
         Assert.DoesNotContain("status 0", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-5)]
+    public void BothConstructionPathsRejectATimeoutHttpClientWouldReject(int seconds)
+    {
+        var timeout = TimeSpan.FromSeconds(seconds);
+
+        // Direct construction used to disable the timeout silently for these values,
+        // while AddAmpeco threw when it assigned the same value to HttpClient.Timeout.
+        var direct = Assert.Throws<ArgumentException>(() => new AmpecoClient(new AmpecoClientOptions
+        {
+            TenantUrl = "https://tenant.example",
+            ApiKey = "token",
+            RequestTimeout = timeout,
+        }));
+        Assert.Contains(nameof(AmpecoClientOptions.RequestTimeout), direct.Message, StringComparison.Ordinal);
+
+        var services = new ServiceCollection();
+        services.AddAmpeco(options =>
+        {
+            options.TenantUrl = "https://tenant.example";
+            options.ApiKey = "token";
+            options.RequestTimeout = timeout;
+        });
+        using var provider = services.BuildServiceProvider();
+
+        Assert.Throws<OptionsValidationException>(() => provider.GetRequiredService<IAmpecoClient>());
+    }
+
+    [Fact]
+    public void AnInfiniteTimeoutIsStillTheSupportedWayToOptOut()
+    {
+        using var client = new AmpecoClient(new AmpecoClientOptions
+        {
+            TenantUrl = "https://tenant.example",
+            ApiKey = "token",
+            RequestTimeout = Timeout.InfiniteTimeSpan,
+        });
+
+        Assert.NotNull(client.ChargePoints);
     }
 
     [Theory]

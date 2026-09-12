@@ -18,12 +18,15 @@ public sealed class ApiConnection : IDisposable
     private readonly AmpecoClientOptions _options;
     private readonly bool _ownsHttpClient;
     private readonly Uri _baseAddress;
+    private readonly TimeSpan _requestTimeout;
 
     /// <summary>Creates a connection from the provided options.</summary>
     public ApiConnection(AmpecoClientOptions options)
     {
         _options = options;
         _ownsHttpClient = options.HttpClient is null;
+        // Snapshot: AmpecoClientOptions is mutable, and the value was validated just now.
+        _requestTimeout = options.RequestTimeout;
 
         if (_ownsHttpClient)
         {
@@ -238,13 +241,15 @@ public sealed class ApiConnection : IDisposable
 
     private CancellationTokenSource? CreateTimeoutSource(CancellationToken cancellationToken)
     {
-        if (_options.RequestTimeout == Timeout.InfiniteTimeSpan || _options.RequestTimeout <= TimeSpan.Zero)
+        // Anything other than InfiniteTimeSpan is a positive duration: AmpecoClientOptions
+        // rejects zero and negatives before a connection is ever built.
+        if (_requestTimeout == Timeout.InfiniteTimeSpan)
         {
             return null;
         }
 
         var source = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        source.CancelAfter(_options.RequestTimeout);
+        source.CancelAfter(_requestTimeout);
         return source;
     }
 

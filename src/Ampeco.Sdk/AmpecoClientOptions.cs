@@ -28,7 +28,10 @@ public sealed class AmpecoClientOptions
     /// </summary>
     public HttpClient? HttpClient { get; set; }
 
-    /// <summary>Per-request timeout applied to API calls. Defaults to 100 seconds.</summary>
+    /// <summary>
+    /// Per-request timeout applied to API calls. Defaults to 100 seconds.
+    /// Must be positive; use <see cref="Timeout.InfiniteTimeSpan"/> to disable it.
+    /// </summary>
     public TimeSpan RequestTimeout { get; set; } = TimeSpan.FromSeconds(100);
 
     /// <summary>
@@ -67,6 +70,14 @@ public sealed class AmpecoClientOptions
         if (DefaultPerPage is < 1 or > 100)
         {
             return $"{nameof(DefaultPerPage)} must be between 1 and 100.";
+        }
+
+        // HttpClient.Timeout rejects zero and negatives, so AddAmpeco would throw on them
+        // while a directly constructed client silently ran with no timeout at all. Reject
+        // them in both paths; Timeout.InfiniteTimeSpan stays the documented way to opt out.
+        if (RequestTimeout <= TimeSpan.Zero && RequestTimeout != Timeout.InfiniteTimeSpan)
+        {
+            return $"{nameof(RequestTimeout)} must be positive, or Timeout.InfiniteTimeSpan to disable it.";
         }
 
         return null;
