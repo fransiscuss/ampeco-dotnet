@@ -14,7 +14,6 @@
 
 ### Bug Fixes
 
-* correct legacy pagination, HttpClient ownership and error messages ([5868302](https://github.com/fransiscuss/ampeco-dotnet/commit/5868302adf432d605f3c1b83f6ddf8ce67205c47))
 * correct legacy pagination, HttpClient ownership and error messages ([f43349d](https://github.com/fransiscuss/ampeco-dotnet/commit/f43349d303f6666971ebe190d601aca236d955eb))
 * reject a RequestTimeout that HttpClient itself rejects ([f1653b1](https://github.com/fransiscuss/ampeco-dotnet/commit/f1653b14b5d90d04cc01d2dfb71c79f3da47fc22))
 
