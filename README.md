@@ -1,5 +1,10 @@
 # AmpecoDotNet.Sdk
 
+[![CI](https://github.com/fransiscuss/ampeco-dotnet/actions/workflows/ci.yml/badge.svg)](https://github.com/fransiscuss/ampeco-dotnet/actions/workflows/ci.yml)
+[![NuGet](https://img.shields.io/nuget/v/AmpecoDotNet.Sdk)](https://www.nuget.org/packages/AmpecoDotNet.Sdk/)
+[![downloads](https://img.shields.io/nuget/dt/AmpecoDotNet.Sdk)](https://www.nuget.org/packages/AmpecoDotNet.Sdk/)
+[![license](https://img.shields.io/github/license/fransiscuss/ampeco-dotnet)](LICENSE)
+
 An unofficial, hand-written .NET client SDK for the [AMPECO EV Charging Platform Public API](https://developers.ampeco.com) — concrete classes only, no code generation. Install from [NuGet](https://www.nuget.org/packages/AmpecoDotNet.Sdk/).
 
 - **Targets:** .NET 8.0 and .NET 10.0 (both LTS)
@@ -58,6 +63,10 @@ Dispose the client when done if it owns its `HttpClient`:
 ```csharp
 client.Dispose();
 ```
+
+Supplying your own `HttpClient` through `AmpecoClientOptions.HttpClient` leaves that
+client's lifetime, `BaseAddress` and `Timeout` entirely to you — the SDK never writes to
+it. `RequestTimeout` is still honoured, applied per request through a cancellation token.
 
 ## Dependency injection
 
@@ -197,4 +206,4 @@ Releases are fully automated via [release-please](https://github.com/googleapis/
 
 ## License
 
-MIT
+MIT. Built and maintained by [Fransiscus Setiawan](https://fransiscuss.com).

@@ -17,15 +17,31 @@ public sealed class ApiConnection : IDisposable
     private readonly HttpClient _httpClient;
     private readonly AmpecoClientOptions _options;
     private readonly bool _ownsHttpClient;
+    private readonly Uri _baseAddress;
+    private readonly TimeSpan _requestTimeout;
 
     /// <summary>Creates a connection from the provided options.</summary>
     public ApiConnection(AmpecoClientOptions options)
     {
         _options = options;
         _ownsHttpClient = options.HttpClient is null;
-        _httpClient = options.HttpClient ?? new HttpClient();
-        _httpClient.BaseAddress ??= options.GetBaseAddress();
-        _httpClient.Timeout = options.RequestTimeout;
+        // Snapshot: AmpecoClientOptions is mutable, and the value was validated just now.
+        _requestTimeout = options.RequestTimeout;
+
+        if (_ownsHttpClient)
+        {
+            _baseAddress = options.GetBaseAddress();
+            _httpClient = new HttpClient { BaseAddress = _baseAddress, Timeout = Timeout.InfiniteTimeSpan };
+        }
+        else
+        {
+            // A caller-supplied HttpClient (including the one IHttpClientFactory hands to the
+            // typed client) is never mutated here: BaseAddress and Timeout cannot be assigned
+            // once it has issued a request, so writing to them can throw. Its own BaseAddress
+            // wins when set; the per-request timeout is enforced with a linked token instead.
+            _httpClient = options.HttpClient!;
+            _baseAddress = _httpClient.BaseAddress ?? options.GetBaseAddress();
+        }
     }
 
     /// <summary>Default items-per-page taken from the client options.</summary>
@@ -48,6 +64,7 @@ public sealed class ApiConnection : IDisposable
         var json = await SendAsync(HttpMethod.Get, path, query, requestBody: null, expectBody: true, cancellationToken).ConfigureAwait(false);
         return DeserializeEnvelope<T>(json, path);
     }
+
     /// <summary>Sends a POST request and deserializes the <c>data</c> envelope.</summary>
     public Task<T> PostAsync<T>(string path, object? requestBody = null, QueryBuilder? query = null, CancellationToken cancellationToken = default)
         => SendWithBodyAsync<T>(HttpMethod.Post, path, query, requestBody, cancellationToken);
@@ -78,7 +95,6 @@ public sealed class ApiConnection : IDisposable
     }
 
     /// <summary>Sends a request where a non-empty success body is not guaranteed (202 Accepted, 204 No Content).</summary>
-    /// <summary>Sends a request where a non-empty success body is not guaranteed.</summary>
     public async Task SendAsyncNoContent(HttpMethod method, string path, object? requestBody = null, QueryBuilder? query = null, CancellationToken cancellationToken = default)
     {
         await SendAsync(method, path, query, requestBody, expectBody: false, cancellationToken).ConfigureAwait(false);
@@ -121,18 +137,17 @@ public sealed class ApiConnection : IDisposable
     {
         query ??= new QueryBuilder();
         string? cursor = null;
-        var lastPage = 0;
+        int? nextPageNumber = null;
 
         while (true)
         {
             query.Set("cursor", cursor ?? string.Empty);
-            if (lastPage > 0)
+            if (nextPageNumber is { } pageNumber)
             {
-                query.Set("page", (lastPage + 1).ToString(System.Globalization.CultureInfo.InvariantCulture));
+                query.Set("page", pageNumber.ToString(System.Globalization.CultureInfo.InvariantCulture));
             }
 
             var page = await GetPageAsync<T>(path, query, cancellationToken).ConfigureAwait(false);
-            lastPage = page.LastPage ?? 0;
 
             foreach (var item in page.Data)
             {
@@ -142,13 +157,16 @@ public sealed class ApiConnection : IDisposable
             if (page.NextCursor is { Length: > 0 } next)
             {
                 cursor = next;
+                nextPageNumber = null;
                 continue;
             }
 
-            if (page.CurrentPage.HasValue && page.LastPage.HasValue && page.CurrentPage < page.LastPage)
+            // Legacy page-based endpoint: advance one page at a time from the page we
+            // just read. Jumping to LastPage + 1 here would skip every page in between.
+            if (page.CurrentPage is { } current && page.LastPage is { } last && current < last)
             {
-                // Legacy page-based endpoint: advance by page number (cursor stays empty).
                 cursor = null;
+                nextPageNumber = current + 1;
                 continue;
             }
 
@@ -184,7 +202,7 @@ public sealed class ApiConnection : IDisposable
             url += "?" + query;
         }
 
-        using var request = new HttpRequestMessage(method, url);
+        using var request = new HttpRequestMessage(method, new Uri(_baseAddress, url));
 
         if (!string.IsNullOrEmpty(_options.ApiKey))
         {
@@ -201,9 +219,12 @@ public sealed class ApiConnection : IDisposable
                 "application/json");
         }
 
-        using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+        using var timeout = CreateTimeoutSource(cancellationToken);
+        var token = timeout?.Token ?? cancellationToken;
 
-        var body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+        using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false);
+
+        var body = await response.Content.ReadAsStringAsync(token).ConfigureAwait(false);
 
         if (!response.IsSuccessStatusCode)
         {
@@ -216,6 +237,20 @@ public sealed class ApiConnection : IDisposable
         }
 
         return body;
+    }
+
+    private CancellationTokenSource? CreateTimeoutSource(CancellationToken cancellationToken)
+    {
+        // Anything other than InfiniteTimeSpan is a positive duration: AmpecoClientOptions
+        // rejects zero and negatives before a connection is ever built.
+        if (_requestTimeout == Timeout.InfiniteTimeSpan)
+        {
+            return null;
+        }
+
+        var source = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        source.CancelAfter(_requestTimeout);
+        return source;
     }
 
     private static T DeserializeEnvelope<T>(string json, string path)

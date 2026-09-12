@@ -24,14 +24,9 @@ public sealed class AmpecoClient : IAmpecoClient, IDisposable
     public AmpecoClient(AmpecoClientOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);
-        if (string.IsNullOrWhiteSpace(options.TenantUrl))
+        if (options.Validate() is { } problem)
         {
-            throw new ArgumentException("TenantUrl is required.", nameof(options));
-        }
-
-        if (string.IsNullOrWhiteSpace(options.ApiKey))
-        {
-            throw new ArgumentException("ApiKey is required.", nameof(options));
+            throw new ArgumentException(problem, nameof(options));
         }
 
         _ownsConnection = options.HttpClient is null;
